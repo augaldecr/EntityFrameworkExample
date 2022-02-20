@@ -13,7 +13,7 @@ namespace EntityFrameworkExample.Test
 
             var userService = new UserService();
 
-            var dbContext = new ApplicationDbContext(options, userService, eventosDbContext: null);
+            var dbContext = new ApplicationDbContext(options, userService, eventsDbContext: null);
             return dbContext;
         }
 

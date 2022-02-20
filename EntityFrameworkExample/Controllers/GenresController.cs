@@ -15,6 +15,12 @@ namespace EntityFrameworkExample.Controllers
         private readonly IMapper _mapper;
         private readonly IDbContextFactory<ApplicationDbContext> _dbContextFactory;
 
+        public GenresController(ApplicationDbContext context, IMapper mapper)
+        {
+            _context = context;
+            _mapper = mapper;
+        }
+
         public GenresController(ApplicationDbContext context, IMapper mapper,
             IDbContextFactory<ApplicationDbContext> dbContextFactory)
         {

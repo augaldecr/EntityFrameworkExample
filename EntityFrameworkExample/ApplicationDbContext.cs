@@ -2,6 +2,7 @@
 using EntityFrameworkExample.Entitites.Functions;
 using EntityFrameworkExample.Entitites.Keyless;
 using EntityFrameworkExample.Entitites.Seeding;
+using EntityFrameworkExample.Services;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 
@@ -9,7 +10,25 @@ namespace EntityFrameworkExample
 {
     public class ApplicationDbContext : DbContext
     {
-        public ApplicationDbContext(DbContextOptions options) : base(options) { }
+        private readonly IUserService _userService;
+
+        //public ApplicationDbContext(DbContextOptions options) : base(options) { }
+
+        public ApplicationDbContext(DbContextOptions options,
+                                    IUserService userService,
+                                    IEventsDbContext eventsDbContext)
+        : base(options)
+        {
+            _userService = userService;
+            if (eventsDbContext is not null)
+            {
+                //ChangeTracker.Tracked += eventosDbContext.ManejarTracked;
+                //ChangeTracker.StateChanged += eventosDbContext.ManejarStateChange;
+                SavingChanges += eventsDbContext.HandleSavingChanges;
+                SavedChanges += eventsDbContext.HandleSavedChanges;
+                SaveChangesFailed += eventsDbContext.HandleSaveChangesFailed;
+            }
+        }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -19,6 +38,31 @@ namespace EntityFrameworkExample
                 {
                     options.UseNetTopologySuite();
                 }).UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+            }
+        }
+
+        public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        {
+            ProcessSaving();
+            return base.SaveChangesAsync(cancellationToken);
+        }
+
+        private void ProcessSaving()
+        {
+            foreach (var item in ChangeTracker.Entries().Where(e => e.State == EntityState.Added
+             && e.Entity is AuditableEntity))
+            {
+                var entity = item.Entity as AuditableEntity;
+                entity.UsersCreation = _userService.GetUserId();
+                entity.UsersModification = _userService.GetUserId();
+            }
+
+            foreach (var item in ChangeTracker.Entries().Where(e => e.State == EntityState.Modified
+             && e.Entity is AuditableEntity))
+            {
+                var entity = item.Entity as AuditableEntity;
+                entity.UsersModification = _userService.GetUserId();
+                item.Property(nameof(entity.UsersCreation)).IsModified = false;
             }
         }
 
@@ -33,12 +77,12 @@ namespace EntityFrameworkExample
 
             modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
 
-            if (!Database.IsInMemory())
-            {
-                MoviesSeeding.Seed(modelBuilder);
-                MessagesSeeding.Seed(modelBuilder);
-                BillsSeeding.Seed(modelBuilder);
-            }
+            //if (!Database.IsInMemory())
+            //{
+            //    MoviesSeeding.Seed(modelBuilder);
+            //    MessagesSeeding.Seed(modelBuilder);
+            //    BillsSeeding.Seed(modelBuilder);
+            //}
 
             Escalars.RegisterFunctions(modelBuilder);
 

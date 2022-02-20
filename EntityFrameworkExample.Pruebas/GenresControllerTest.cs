@@ -37,7 +37,7 @@ namespace EntityFrameworkExample.Test
             Assert.IsTrue(genre1Exist, message: "Genre 1 not found");
 
             var genre2Exist = genresDB.Any(g => g.Name == "Genre 2");
-            Assert.IsTrue(genre2Exist, message: "Genre 1 not found");
+            Assert.IsTrue(genre2Exist, message: "Genre 2 not found");
         }
 
         [TestMethod]

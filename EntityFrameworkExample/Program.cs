@@ -12,6 +12,8 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+//builder.Services.AddDbContext<ApplicationDbContext>(options =>
+//builder.Services.AddDbContextPool<ApplicationDbContext>(options =>
 builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
 {
     options.UseSqlServer(connectionString, sqlServer => sqlServer.UseNetTopologySuite());
@@ -21,8 +23,8 @@ builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
 });
 
 builder.Services.AddScoped<IUpdaterObservableCollection, UpdaterObservableCollection>();
-builder.Services.AddScoped<IUserService, UserService>();
-builder.Services.AddScoped<IEventsDbContext, EventsDbContext>();
+builder.Services.AddTransient<IUserService, UserService>();
+builder.Services.AddTransient<IEventsDbContext, EventsDbContext>();
 builder.Services.AddSingleton<Singleton>();
 
 builder.Services.AddAutoMapper(typeof(Program));

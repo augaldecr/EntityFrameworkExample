@@ -40,7 +40,7 @@ namespace EntityFrameworkExample.Test
 
             var servicioUsuario = new UserService();
 
-            var context = new ApplicationDbContext(options, servicioUsuario, eventosDbContext: null);
+            var context = new ApplicationDbContext(options, servicioUsuario, eventsDbContext: null);
             if (beginTransaction)
             {
                 context.Database.BeginTransaction();

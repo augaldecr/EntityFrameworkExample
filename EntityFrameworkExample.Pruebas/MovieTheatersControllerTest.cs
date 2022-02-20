@@ -26,7 +26,7 @@ namespace EntityFrameworkExample.Test
                 var res = await controller.Get(latitud, longitud);
                 var objectResult = res as ObjectResult;
                 var movieTheaters = (IEnumerable<object>)objectResult.Value;
-                Assert.AreEqual(2, movieTheaters.Count());
+                Assert.AreEqual(0, movieTheaters.Count());
             }
         }
     }
